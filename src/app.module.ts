@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { BooksModule } from './books/books.module';
 import { BorrowersModule } from './borrowers/borrowers.module';
 import { BorrowingsModule } from './borrowings/borrowings.module';
+import { ReportsModule } from './reports/reports.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AppController } from './app.controller';
@@ -28,6 +29,7 @@ import { AppService } from './app.service';
     BooksModule,
     BorrowersModule,
     BorrowingsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [
