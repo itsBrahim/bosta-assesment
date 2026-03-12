@@ -6,6 +6,7 @@ RUN npm ci
 COPY . .
 RUN npx prisma generate
 RUN npm run build
+RUN npx tsc -p tsconfig.seed.json
 
 # Stage 2: Production
 FROM node:20-alpine AS production
@@ -15,6 +16,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma ./prisma
