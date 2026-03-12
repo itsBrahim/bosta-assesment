@@ -58,31 +58,31 @@ export class BorrowingsService {
     dueDate.setDate(dueDate.getDate() + 14);
 
     // Use transaction to create record and decrement quantity atomically
-    const [record] = (await this.prisma.$transaction([
-      this.prisma.borrowingRecord.create({
+    const createdRecord = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.borrowingRecord.create({
         data: {
-          bookId: dto.bookId,
-          borrowerId,
+          book: { connect: { id: dto.bookId } },
+          borrower: { connect: { id: borrowerId } },
           checkedOutAt: now,
           dueDate,
-          returnedAt: null,
         },
-        include: {
-          book: {
-            select: { title: true, author: true, isbn: true },
-          },
-        },
-      }),
-      this.prisma.book.update({
+      });
+      await tx.book.update({
         where: { id: dto.bookId },
         data: { availableQuantity: { decrement: 1 } },
-      }),
-    ])) as unknown as [
-      BorrowingRecord & { book: { title: string; author: string; isbn: string } },
-      BorrowingRecord,
-    ];
+      });
+      return created;
+    });
 
-    return record;
+    // Fetch with book details after transaction
+    const record = await this.prisma.borrowingRecord.findUnique({
+      where: { id: createdRecord.id },
+      include: {
+        book: { select: { title: true, author: true, isbn: true } },
+      },
+    });
+
+    return record!;
   }
 
   async returnBook(borrowerId: string, recordId: string): Promise<BorrowingRecord> {
@@ -102,16 +102,17 @@ export class BorrowingsService {
       throw new ConflictException('This book has already been returned');
     }
 
-    const [updatedRecord] = (await this.prisma.$transaction([
-      this.prisma.borrowingRecord.update({
+    const updatedRecord = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.borrowingRecord.update({
         where: { id: recordId },
         data: { returnedAt: new Date() },
-      }),
-      this.prisma.book.update({
+      });
+      await tx.book.update({
         where: { id: record.bookId },
         data: { availableQuantity: { increment: 1 } },
-      }),
-    ])) as unknown as [BorrowingRecord, BorrowingRecord];
+      });
+      return updated;
+    });
 
     return updatedRecord;
   }

@@ -58,9 +58,11 @@ describe('BorrowingsService', () => {
         book: { title: 'Test Book', author: 'Author', isbn: '9780743273565' },
       };
       mockPrismaService.borrowingRecord.create.mockResolvedValue(createdRecord);
+      mockPrismaService.borrowingRecord.findUnique.mockResolvedValue(createdRecord);
       mockPrismaService.book.update.mockResolvedValue({ ...mockBook, availableQuantity: 1 });
-      mockPrismaService.$transaction.mockImplementation((ops: Promise<unknown>[]) =>
-        Promise.all(ops),
+      mockPrismaService.$transaction.mockImplementation(
+        async (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          callback(mockPrismaService),
       );
 
       const result = await service.checkout('borrower-uuid-1', { bookId: 'book-uuid-1' });
@@ -110,8 +112,9 @@ describe('BorrowingsService', () => {
       const returnedRecord = { ...mockBorrowingRecord, returnedAt: new Date() };
       mockPrismaService.borrowingRecord.update.mockResolvedValue(returnedRecord);
       mockPrismaService.book.update.mockResolvedValue({ ...mockBook, availableQuantity: 3 });
-      mockPrismaService.$transaction.mockImplementation((ops: Promise<unknown>[]) =>
-        Promise.all(ops),
+      mockPrismaService.$transaction.mockImplementation(
+        async (callback: (tx: typeof mockPrismaService) => Promise<unknown>) =>
+          callback(mockPrismaService),
       );
 
       const result = await service.returnBook('borrower-uuid-1', 'record-uuid-1');
