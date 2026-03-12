@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  BORROWER
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         Role      @default(BORROWER)
+  registeredAt DateTime  @default(now()) @map("registered_at")
+
+  borrowingRecords BorrowingRecord[]
+
+  @@map("users")
+}
+
+model Book {
+  id                String   @id @default(uuid())
+  title             String
+  author            String
+  isbn              String   @unique
+  availableQuantity Int      @default(0) @map("available_quantity")
+  shelfLocation     String   @map("shelf_location")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  borrowingRecords BorrowingRecord[]
+
+  @@index([title])
+  @@index([author])
+  @@index([isbn])
+  @@map("books")
+}
+
+model BorrowingRecord {
+  id           String    @id @default(uuid())
+  bookId       String    @map("book_id")
+  borrowerId   String    @map("borrower_id")
+  checkedOutAt DateTime  @default(now()) @map("checked_out_at")
+  dueDate      DateTime  @map("due_date")
+  returnedAt   DateTime? @map("returned_at")
+
+  book     Book @relation(fields: [bookId], references: [id])
+  borrower User @relation(fields: [borrowerId], references: [id])
+
+  @@index([borrowerId])
+  @@index([bookId])
+  @@map("borrowing_records")
+}
