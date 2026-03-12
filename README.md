@@ -1,98 +1,178 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Library Management System API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[![CI](https://github.com/your-username/library-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/library-management-system/actions/workflows/ci.yml)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A production-ready Library Management System REST API built with NestJS, Prisma, and PostgreSQL. Supports role-based access control (Admin/Borrower), book management, borrowing lifecycle, and reporting.
 
-## Description
+## Prerequisites
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Node.js** >= 20.x
+- **npm** >= 10.x
+- **Docker** & **Docker Compose** (for Docker setup)
+- **PostgreSQL** >= 15 (for non-Docker setup)
 
-## Project setup
+## Setup (with Docker)
 
 ```bash
-$ npm install
+cp .env.example .env
+# Edit .env to set your JWT_SECRET and other values
+docker-compose up --build
 ```
 
-## Compile and run the project
+The application will be available at `http://localhost:3000/api`.
+Swagger UI: `http://localhost:3000/api/docs`
+
+## Setup (without Docker)
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+# Make sure PostgreSQL is running and DATABASE_URL is set in .env
+npx prisma migrate dev
+npx prisma db seed
+npm run start:dev
 ```
 
-## Run tests
+## Default Admin Credentials
+
+After running the seed:
+- **Email:** `admin@library.com`
+- **Password:** `Admin@12345`
+
+## Running Tests
 
 ```bash
-# unit tests
-$ npm run test
+# Unit tests
+npm run test
 
-# e2e tests
-$ npm run test:e2e
+# With coverage report
+npm run test:cov
 
-# test coverage
-$ npm run test:cov
+# Lint check
+npm run lint
 ```
 
-## Deployment
+## API Endpoints
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Auth
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| POST | `/api/auth/register` | Public | Register as borrower |
+| POST | `/api/auth/login` | Public | Login (sets HTTP-only cookie) |
+| POST | `/api/auth/logout` | Authenticated | Logout (clears cookie) |
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+### Books
+
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| GET | `/api/books` | Authenticated | List all books |
+| GET | `/api/books/search?q=&by=title\|author\|isbn` | Authenticated | Search books (rate limited: 20/min) |
+| GET | `/api/books/:id` | Authenticated | Get book by ID |
+| POST | `/api/books` | Admin | Create new book |
+| PATCH | `/api/books/:id` | Admin | Update book |
+| DELETE | `/api/books/:id` | Admin | Delete book (blocked if checked out) |
+
+### Borrowers
+
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| GET | `/api/borrowers` | Admin | List all borrowers |
+| GET | `/api/borrowers/:id` | Admin | Get borrower by ID |
+| PATCH | `/api/borrowers/:id` | Admin | Update borrower |
+| DELETE | `/api/borrowers/:id` | Admin | Delete borrower (blocked if active checkouts) |
+
+### Borrowings
+
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| POST | `/api/borrowings/checkout` | Borrower | Check out a book (rate limited: 20/min) |
+| POST | `/api/borrowings/return/:id` | Borrower | Return a book |
+| GET | `/api/borrowings/my` | Borrower | My active checkouts with `isOverdue` flag |
+| GET | `/api/borrowings` | Admin | All borrowing records |
+| GET | `/api/borrowings/overdue` | Admin | All overdue records |
+
+### Reports
+
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| GET | `/api/reports/analytics` | Admin | Last month analytics |
+| GET | `/api/reports/export/overdue/last-month?format=csv\|xlsx` | Admin | Export overdue borrowings |
+| GET | `/api/reports/export/all/last-month?format=csv\|xlsx` | Admin | Export all borrowings |
+
+## Business Rules
+
+- Default checkout duration: **14 days**
+- Max concurrent checkouts per borrower: **5 books**
+- Book with `availableQuantity = 0` cannot be checked out
+- Same book cannot be checked out twice concurrently by the same borrower
+- Books with active checkouts cannot be deleted
+- Borrowers with active checkouts cannot be deleted
+- Rate limiting: 20 requests/minute per IP on search and checkout endpoints
+
+## Database Schema
+
+```mermaid
+erDiagram
+    users {
+        uuid id PK
+        string name
+        string email UK
+        string password
+        enum role
+        datetime registered_at
+    }
+
+    books {
+        uuid id PK
+        string title
+        string author
+        string isbn UK
+        int available_quantity
+        string shelf_location
+        datetime created_at
+        datetime updated_at
+    }
+
+    borrowing_records {
+        uuid id PK
+        uuid book_id FK
+        uuid borrower_id FK
+        datetime checked_out_at
+        datetime due_date
+        datetime returned_at
+    }
+
+    users ||--o{ borrowing_records : "has"
+    books ||--o{ borrowing_records : "has"
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Environment Variables
 
-## Resources
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PORT` | Application port | `3000` |
+| `NODE_ENV` | Runtime environment | `development` |
+| `DATABASE_URL` | PostgreSQL connection URL | `postgresql://user:pass@localhost:5432/library_db` |
+| `JWT_SECRET` | Secret for JWT signing | `your-super-secret-key` |
+| `JWT_EXPIRES_IN` | JWT expiry duration | `7d` |
 
-Check out a few resources that may come in handy when working with NestJS:
+## Security
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- Passwords stored as bcrypt hash (10 rounds)
+- JWT stored in HTTP-only, SameSite=Strict cookie
+- Secure cookie flag enabled in production
+- Global exception filter hides stack traces in production
+- All routes protected by JWT auth guard by default
+- Role-based access enforced via RolesGuard
 
-## Support
+## Tech Stack
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **Framework:** NestJS
+- **Language:** TypeScript (strict mode)
+- **ORM:** Prisma 7
+- **Database:** PostgreSQL 15
+- **Auth:** JWT + HTTP-only Cookies
+- **Testing:** Jest
+- **Export:** ExcelJS (CSV + XLSX)
+- **Rate Limiting:** @nestjs/throttler
+- **Containerization:** Docker + docker-compose
