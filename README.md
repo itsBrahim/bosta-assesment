@@ -35,6 +35,7 @@ npm run start:dev
 ## Default Admin Credentials
 
 After running the seed:
+
 - **Email:** `admin@library.com`
 - **Password:** `Admin@12345`
 
@@ -55,49 +56,49 @@ npm run lint
 
 ### Auth
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| POST | `/api/auth/register` | Public | Register as borrower |
-| POST | `/api/auth/login` | Public | Login (sets HTTP-only cookie) |
-| POST | `/api/auth/logout` | Authenticated | Logout (clears cookie) |
+| Method | Endpoint             | Access        | Description                   |
+| ------ | -------------------- | ------------- | ----------------------------- |
+| POST   | `/api/auth/register` | Public        | Register as borrower          |
+| POST   | `/api/auth/login`    | Public        | Login (sets HTTP-only cookie) |
+| POST   | `/api/auth/logout`   | Authenticated | Logout (clears cookie)        |
 
 ### Books
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/books` | Authenticated | List all books |
-| GET | `/api/books/search?q=&by=title\|author\|isbn` | Authenticated | Search books (rate limited: 20/min) |
-| GET | `/api/books/:id` | Authenticated | Get book by ID |
-| POST | `/api/books` | Admin | Create new book |
-| PATCH | `/api/books/:id` | Admin | Update book |
-| DELETE | `/api/books/:id` | Admin | Delete book (blocked if checked out) |
+| Method | Endpoint                                      | Access        | Description                          |
+| ------ | --------------------------------------------- | ------------- | ------------------------------------ |
+| GET    | `/api/books`                                  | Authenticated | List all books                       |
+| GET    | `/api/books/search?q=&by=title\|author\|isbn` | Authenticated | Search books (rate limited: 20/min)  |
+| GET    | `/api/books/:id`                              | Authenticated | Get book by ID                       |
+| POST   | `/api/books`                                  | Admin         | Create new book                      |
+| PATCH  | `/api/books/:id`                              | Admin         | Update book                          |
+| DELETE | `/api/books/:id`                              | Admin         | Delete book (blocked if checked out) |
 
 ### Borrowers
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/borrowers` | Admin | List all borrowers |
-| GET | `/api/borrowers/:id` | Admin | Get borrower by ID |
-| PATCH | `/api/borrowers/:id` | Admin | Update borrower |
-| DELETE | `/api/borrowers/:id` | Admin | Delete borrower (blocked if active checkouts) |
+| Method | Endpoint             | Access | Description                                   |
+| ------ | -------------------- | ------ | --------------------------------------------- |
+| GET    | `/api/borrowers`     | Admin  | List all borrowers                            |
+| GET    | `/api/borrowers/:id` | Admin  | Get borrower by ID                            |
+| PATCH  | `/api/borrowers/:id` | Admin  | Update borrower                               |
+| DELETE | `/api/borrowers/:id` | Admin  | Delete borrower (blocked if active checkouts) |
 
 ### Borrowings
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| POST | `/api/borrowings/checkout` | Borrower | Check out a book (rate limited: 20/min) |
-| POST | `/api/borrowings/return/:id` | Borrower | Return a book |
-| GET | `/api/borrowings/my` | Borrower | My active checkouts with `isOverdue` flag |
-| GET | `/api/borrowings` | Admin | All borrowing records |
-| GET | `/api/borrowings/overdue` | Admin | All overdue records |
+| Method | Endpoint                     | Access   | Description                               |
+| ------ | ---------------------------- | -------- | ----------------------------------------- |
+| POST   | `/api/borrowings/checkout`   | Borrower | Check out a book (rate limited: 20/min)   |
+| POST   | `/api/borrowings/return/:id` | Borrower | Return a book                             |
+| GET    | `/api/borrowings/my`         | Borrower | My active checkouts with `isOverdue` flag |
+| GET    | `/api/borrowings`            | Admin    | All borrowing records                     |
+| GET    | `/api/borrowings/overdue`    | Admin    | All overdue records                       |
 
 ### Reports
 
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| GET | `/api/reports/analytics` | Admin | Last month analytics |
-| GET | `/api/reports/export/overdue/last-month?format=csv\|xlsx` | Admin | Export overdue borrowings |
-| GET | `/api/reports/export/all/last-month?format=csv\|xlsx` | Admin | Export all borrowings |
+| Method | Endpoint                                                  | Access | Description               |
+| ------ | --------------------------------------------------------- | ------ | ------------------------- |
+| GET    | `/api/reports/analytics`                                  | Admin  | Last month analytics      |
+| GET    | `/api/reports/export/overdue/last-month?format=csv\|xlsx` | Admin  | Export overdue borrowings |
+| GET    | `/api/reports/export/all/last-month?format=csv\|xlsx`     | Admin  | Export all borrowings     |
 
 ## Business Rules
 
@@ -148,13 +149,13 @@ erDiagram
 
 ## Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PORT` | Application port | `3000` |
-| `NODE_ENV` | Runtime environment | `development` |
-| `DATABASE_URL` | PostgreSQL connection URL | `postgresql://user:pass@localhost:5432/library_db` |
-| `JWT_SECRET` | Secret for JWT signing | `your-super-secret-key` |
-| `JWT_EXPIRES_IN` | JWT expiry duration | `7d` |
+| Variable         | Description               | Example                                            |
+| ---------------- | ------------------------- | -------------------------------------------------- |
+| `PORT`           | Application port          | `3000`                                             |
+| `NODE_ENV`       | Runtime environment       | `development`                                      |
+| `DATABASE_URL`   | PostgreSQL connection URL | `postgresql://user:pass@localhost:5432/library_db` |
+| `JWT_SECRET`     | Secret for JWT signing    | `your-super-secret-key`                            |
+| `JWT_EXPIRES_IN` | JWT expiry duration       | `7d`                                               |
 
 ## Security
 
