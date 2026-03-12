@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { BooksModule } from './books/books.module';
 import { BorrowersModule } from './borrowers/borrowers.module';
+import { BorrowingsModule } from './borrowings/borrowings.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AppController } from './app.controller';
@@ -26,6 +27,7 @@ import { AppService } from './app.service';
     AuthModule,
     BooksModule,
     BorrowersModule,
+    BorrowingsModule,
   ],
   controllers: [AppController],
   providers: [
