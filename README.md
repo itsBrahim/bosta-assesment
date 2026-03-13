@@ -65,6 +65,20 @@ Using AI effectively is not about prompting it to write code — it's about givi
 - **No rubber-stamping:** Quality gates had to actually pass — the agent fixed real linting, TypeScript, and test failures at each stage.
 - **Verifiable output:** The final deliverable was smoke-tested end-to-end on both local PostgreSQL and a clean `docker-compose up --build` run, confirming the full borrowing lifecycle (register → checkout → `isOverdue` flag → return → quantity restored).
 
+### Human review & collaboration
+
+The developer actively participated throughout the entire process — this was a collaboration, not a delegation.
+
+Every sprint's output was reviewed before merging: the code was read, the architectural decisions were understood, and the test results were verified. When the agent hit the Prisma 7 blockers listed above, the debugging process was a live technical discussion — the agent would surface the exact error, reason through the root cause, propose a fix, and the developer validated whether the diagnosis and solution made sense before proceeding.
+
+Key moments where human judgment shaped the outcome:
+
+- **Choosing Prisma 7 over an older version** — knowing the bleeding-edge version would introduce friction was an intentional decision to demonstrate working with newer tooling rather than staying on comfortable ground.
+- **Insisting on end-to-end Docker verification** — after local tests passed, the developer explicitly requested a full `docker-compose up --build` from a clean state, which is what surfaced the `ts-node` production-stage bug and the seed pre-compilation fix.
+- **Requesting the CI fix** — the developer spotted the failing pipeline, shared the exact error output, and engaged in a precise diagnosis of why `prisma generate` was missing from the workflow.
+
+The result is code that the developer can explain, defend, and extend — not a black box that happened to be produced by a model.
+
 The complete prompt and sprint specs are in [`docs/`](docs/).
 
 ## Prerequisites
